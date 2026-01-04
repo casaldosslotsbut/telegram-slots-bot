@@ -1,25 +1,53 @@
-name: Bot Horários Slots
+from telegram import Bot
+from datetime import datetime
+import pytz
+import os
+import random
 
-on:
-  schedule:
-    - cron: "0 * * * *"   # executa a cada 1 hora
-  workflow_dispatch:
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+CHAT_ID = os.getenv("CHAT_ID")
 
-jobs:
-  run-bot:
-    runs-on: ubuntu-latest
+bot = Bot(token=BOT_TOKEN)
 
-    steps:
-      - name: Baixar repositório
-        uses: actions/checkout@v4
+# Fuso horário Brasil
+tz = pytz.timezone("America/Sao_Paulo")
 
-      - name: Configurar Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
+# Jogos e horários base (minutos variáveis)
+jogos = {
+    "🐮 FORTUNE OX 🐮": ["00", "07", "11", "20", "31", "41", "50"],
+    "🐯 FORTUNE TIGER 🐯": ["11", "13", "33", "37", "44", "49"],
+    "🍬 SWEET BONANZA 🍬": ["01", "07", "11", "23", "27", "41"],
+    "⚡ GATES OF OLYMPUS ⚡": ["06", "16", "22", "36", "48"],
+    "🍭 SUGAR RUSH 🍭": ["04", "09", "19", "29", "42", "54"],
+}
 
-      - name: Instalar dependências
-        run: pip install python-telegram-bot
+agora = datetime.now(tz)
+hora_atual = agora.strftime("%H")
 
-      - name: Executar bot
-        run: python bot1.py
+mensagens = []
+
+for jogo, minutos in jogos.items():
+    horarios = []
+    for m in minutos:
+        # pequena variação automática de minuto
+        variacao = random.choice(["", "", "", ""])
+        horarios.append(f"{hora_atual}:{m}{variacao}")
+
+    linha = f"* {jogo} *\n" + " | ".join(horarios)
+    mensagens.append(linha)
+
+texto = f"""
+🎰 HORÁRIOS DE ATENÇÃO 🎰
+
+{chr(10).join(mensagens)}
+
+⚠️ Palpites automáticos
+🎰 Jogue com responsabilidade
+🔞 Proibido para menores
+"""
+
+bot.send_message(
+    chat_id=CHAT_ID,
+    text=texto,
+    parse_mode="Markdown"
+)
