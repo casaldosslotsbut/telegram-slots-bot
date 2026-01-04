@@ -1,19 +1,7 @@
-from telegram import Bot
-from datetime import datetime
-import pytz
-import os
-import random
-
-# pega os segredos do GitHub
-BOT_TOKEN = os.getenv("BOT_TOKEN")
-CHAT_ID = os.getenv("CHAT_ID")
-
-# cria o bot corretamente
-bot = Bot(token=BOT_TOKEN)
-
-# fuso horario Brasil
-tz = pytz.timezone("America/Sao_Paulo")
-agora = datetime.now(tz)
+- name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
 hora = agora.strftime("%H")
 
 jogos = {
